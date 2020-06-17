@@ -1,0 +1,180 @@
+-- 1.对魔法、模板、音乐、一键出片、h5活动、王者战报曾有过正向行为的用户数量（不局限于推荐页场景)
+select 
+    dates, 
+    count(distinct qimei) as user_num
+from 
+    (
+        select 
+          dt as dates, 
+          video_id, 
+          qimei,
+          account_id
+        from wesee::fact_event_action_mix_day
+        where dt between 20200518 and 20200524
+          and (like_num > 0
+          or share_num > 0
+          or comment_num > 0
+          or (video_play_time/video_total_time)> 0.9)
+        group by dt, video_id, qimei, account_id
+    ) a
+join
+    (
+        select 
+          imp_date as dates2, 
+          video_id as video_id2, 
+          qimei as qimei2,
+          account_id as account_id2
+        from pcg_weishi_application::weishi_dim_video_upload_daily
+        where imp_date between 20200518 and 20200524
+            and (is_magic='1' 
+            or (mode_id != '0' and mode_id != '' and mode_id != '1')
+            or is_music = '1'
+            or is_movie = '1' 
+            or (h5material_id is not null and h5material_id !='')
+            or cast(upload_from as bigint)>10001)
+        group by imp_date, video_id, qimei, account_id
+    ) b
+on a.video_id=b.video_id2 and a.dates=b.dates2
+full outer join
+    (
+      select 
+        imp_date as dates3, 
+        video_id as video_id3, 
+        qimei as qimei3, 
+        account_id as account_id3
+      from pcg_weishi_application::weishi_dim_video_upload_daily
+      where imp_date between 20200518 and 20200524
+        and (is_magic='1' 
+        or (mode_id != '0' and mode_id != '' and mode_id != '1')
+        or is_music = '1'
+        or is_movie = '1' 
+        or (h5material_id is not null and h5material_id !='')
+        or cast(upload_from as bigint)>10001)
+      group by imp_date, video_id, qimei, account_id
+    ) c
+on a.video_id=c.video_id3 and a.dates=c.dates3
+full outer join
+    (
+      select
+        imp_date as dates4, 
+        video_id as video_id4, 
+        qimei as qimei4,
+        account_id as account_id4
+      from pcg_weishi_application::weishi_event_user_exposure_action_type_detail_daily
+      where imp_date between 20200518 and 20200524
+        and action_id=10000002
+        and ((page_id=10007001 and position='magic')
+        or (page_id=10007010)
+        or (page_id=10007001 and position='music')
+        or (page_id=10007004 and position='magicid')
+        or (page_id=10007003)
+        or (page_id=30004162 and position='reserve.auth')
+        or (page_id=30004162 and position='weekfloat.publish')
+        or (page_id=10007012 and position='movie'))
+      group by imp_date, video_id, qimei, account_id
+    ) d
+on a.video_id=d.video_id4 and a.dates=d.dates4
+group by dates;
+
+
+
+-- 2.对魔法、模板、音乐、一键出片、h5活动、王者战报曾有过正向行为的用户数量（限于推荐页场景)
+select 
+    dates, 
+    count(distinct qimei) as user_num
+from 
+    (
+        select 
+          dt as dates, 
+          video_id, 
+          qimei,
+          account_id
+        from wesee::fact_event_action_mix_day
+        where dt between 20200518 and 20200524
+          and (like_num > 0
+          or share_num > 0
+          or comment_num > 0
+          or (video_play_time/video_total_time)> 0.9)
+        group by dt, video_id, qimei, account_id
+    ) a
+join
+    (
+        select 
+          imp_date as dates2, 
+          video_id as video_id2, 
+          qimei as qimei2,
+          account_id as account_id2
+        from pcg_weishi_application::weishi_dim_video_upload_daily
+        where imp_date between 20200518 and 20200524
+            and (is_magic='1' 
+            or (mode_id != '0' and mode_id != '' and mode_id != '1')
+            or is_music = '1'
+            or is_movie = '1' 
+            or (h5material_id is not null and h5material_id !='')
+            or cast(upload_from as bigint)>10001)
+        group by imp_date, video_id, qimei, account_id
+    ) b
+on a.video_id=b.video_id2 and a.dates=b.dates2
+full outer join
+    (
+      select 
+        imp_date as dates3, 
+        video_id as video_id3, 
+        qimei as qimei3, 
+        account_id as account_id3
+      from pcg_weishi_application::weishi_dim_video_upload_daily
+      where imp_date between 20200518 and 20200524
+        and (is_magic='1' 
+        or (mode_id != '0' and mode_id != '' and mode_id != '1')
+        or is_music = '1'
+        or is_movie = '1' 
+        or (h5material_id is not null and h5material_id !='')
+        or cast(upload_from as bigint)>10001)
+      group by imp_date, video_id, qimei, account_id
+    ) c
+on a.video_id=c.video_id3 and a.dates=c.dates3
+full outer join
+    (
+      select
+        imp_date as dates4, 
+        video_id as video_id4, 
+        qimei as qimei4,
+        account_id as account_id4
+      from pcg_weishi_application::weishi_event_user_exposure_action_type_detail_daily
+      where imp_date between 20200518 and 20200524
+        and action_id=10000002
+        and ((page_id=10007001 and position='magic')
+        or (page_id=10007010)
+        or (page_id=10007001 and position='music')
+        or (page_id=10007004 and position='magicid')
+        or (page_id=10007003)
+        or (page_id=30004162 and position='reserve.auth')
+        or (page_id=30004162 and position='weekfloat.publish')
+        or (page_id=10007012 and position='movie'))
+      group by imp_date, video_id, qimei, account_id
+    ) d
+on a.video_id=d.video_id4 and a.dates=d.dates4
+join
+    (
+      select 
+        dt as date5,
+        video_id as video_id5,
+        qimei as qimei5,
+        account_id as account_id5
+      from wesee::fact_event_action_mix_day
+      where dt between 20200518 and 20200524
+          and page_id = 10001001
+          and video_play_time > 0
+      group by dt, qimei, video_id, account_id
+    ) e
+on a.qimei=e.qimei5 and a.dates=e.date5
+group by dates;
+
+
+-- 3. 大盘推荐页有播放用户数量
+select dt, count(distinct qimei) as user_num
+from wesee::fact_event_action_mix_day
+    where dt between 20200518 and 20200524
+    and page_id = 10001001
+    and video_play_time > 0
+group by dt;
