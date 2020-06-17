@@ -5,5 +5,6 @@ As Tencent's short- and mini-video creation and sharing platform, WeSee provides
 
 # Some statistics
 DAU: 31 million
+
 Daily Video View Count: 1.1 billion
 
